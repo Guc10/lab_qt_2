@@ -30,7 +30,7 @@ void MainWindow::on_actionopen_triggered()
         ui->imageLabel->adjustSize();
 
         sendStatus("File loaded...", 3000);
-        updateStatus(1);
+        updateStatus(image->type);
     }else{
         sendStatus("Task failed...", 0);
     }

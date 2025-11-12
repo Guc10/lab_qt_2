@@ -3,10 +3,21 @@
 
 #include <qimage.h>
 #include <qpixmap.h>
+
 #include <QMessageBox>
-#include <QFile>
 #include <QByteArray>
-#include <QDebug>
+#include <QTextStream>
+#include <QColor>
+#include <QFile>
+
+enum Type{
+    p1 = 1,
+    p2 = 2,
+    p3 = 3,
+    p4 = 4,
+    p5 = 5,
+    p6 = 6
+};
 
 class imageUtils
 {
@@ -16,8 +27,9 @@ public:
     imageUtils();
     ~imageUtils();
 
-    bool Open(QString filename);
+    Type type;
 
+    bool Open(QString filename);
     bool Convert(QString filename);
 private:
 };
