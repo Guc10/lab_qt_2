@@ -9,5 +9,8 @@
         <file>img/p1.pbm</file>
         <file>img/p2.pgm</file>
         <file>img/p3.ppm</file>
+        <file>img/p4.pbm</file>
+        <file>img/p5.pgm</file>
+        <file>img/p6.ppm</file>
     </qresource>
 </RCC>
