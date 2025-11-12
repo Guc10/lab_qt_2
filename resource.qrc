@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/res">
+        <file>img/close.png</file>
+        <file>img/open.png</file>
+        <file>img/save.png</file>
+        <file>img/clear.png</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file>img/p1.pbm</file>
+        <file>img/p2.pgm</file>
+        <file>img/p3.ppm</file>
+    </qresource>
+</RCC>
