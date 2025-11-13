@@ -89,7 +89,27 @@
     <addaction name="actionClose"/>
     <addaction name="actionclear"/>
    </widget>
+   <widget class="QMenu" name="menucolor">
+    <property name="title">
+     <string>color</string>
+    </property>
+    <addaction name="actiondesaturation"/>
+    <addaction name="actionnegatyw"/>
+    <addaction name="actionkontrast"/>
+    <addaction name="actionjasnosc"/>
+    <addaction name="actionnasycenie"/>
+   </widget>
+   <widget class="QMenu" name="menuimage">
+    <property name="title">
+     <string>image</string>
+    </property>
+    <addaction name="actionsuma"/>
+    <addaction name="actionroznica"/>
+    <addaction name="actioniloczyn"/>
+   </widget>
    <addaction name="menufile"/>
+   <addaction name="menucolor"/>
+   <addaction name="menuimage"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -141,6 +161,46 @@
    </property>
    <property name="text">
     <string>Clear</string>
+   </property>
+  </action>
+  <action name="actiondesaturation">
+   <property name="text">
+    <string>desaturation</string>
+   </property>
+  </action>
+  <action name="actionnegatyw">
+   <property name="text">
+    <string>negative</string>
+   </property>
+  </action>
+  <action name="actionkontrast">
+   <property name="text">
+    <string>contrast</string>
+   </property>
+  </action>
+  <action name="actionjasnosc">
+   <property name="text">
+    <string>brightness</string>
+   </property>
+  </action>
+  <action name="actionnasycenie">
+   <property name="text">
+    <string>saturation</string>
+   </property>
+  </action>
+  <action name="actionsuma">
+   <property name="text">
+    <string>sum</string>
+   </property>
+  </action>
+  <action name="actionroznica">
+   <property name="text">
+    <string>difference</string>
+   </property>
+  </action>
+  <action name="actioniloczyn">
+   <property name="text">
+    <string>product</string>
    </property>
   </action>
  </widget>
