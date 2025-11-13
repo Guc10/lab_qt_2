@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setWindowTitle("MIT image manipulation programme 6.7");
+    this->setWindowTitle("image manipulation programme 6.7");
 }
 
 MainWindow::~MainWindow()
