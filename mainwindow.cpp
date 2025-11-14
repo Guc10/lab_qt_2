@@ -29,6 +29,7 @@ void MainWindow::on_actionopen_triggered()
         ui->imageLabel->setPixmap(image->pixmap);
         ui->imageLabel->adjustSize();
 
+
         sendStatus("File loaded...", 3000);
         updateStatus(image->type);
     }else{

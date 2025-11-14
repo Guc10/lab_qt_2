@@ -25,6 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         resource.qrc
         imageutils.h imageutils.cpp
+        readme.md
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET lab_qt_2 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
