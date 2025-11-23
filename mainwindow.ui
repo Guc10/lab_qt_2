@@ -25,11 +25,11 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>677</width>
+         <width>512</width>
          <height>532</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QLabel" name="imageLabel">
           <property name="sizePolicy">
@@ -48,22 +48,225 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>Info</string>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QLabel" name="imageType">
-         <property name="text">
-          <string/>
+        <widget class="QTabWidget" name="Operations">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+         <property name="whatsThis">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
+         <property name="currentIndex">
+          <number>5</number>
+         </property>
+         <widget class="QWidget" name="info">
+          <attribute name="title">
+           <string>Info</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QGroupBox" name="groupBox">
+             <property name="title">
+              <string>Info</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QLabel" name="imageType">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="desaturation">
+          <attribute name="title">
+           <string>Desaturation</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QGroupBox" name="groupBox_2">
+             <property name="title">
+              <string>Desaturation</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
+               <widget class="QSlider" name="desaturation_slider">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="pageStep">
+                 <number>0</number>
+                </property>
+                <property name="sliderPosition">
+                 <number>99</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="negative">
+          <attribute name="title">
+           <string>Negative</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QGroupBox" name="groupBox_3">
+             <property name="title">
+              <string>Negative</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QCheckBox" name="checkBox">
+                <property name="text">
+                 <string>apply</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="contrast">
+          <attribute name="title">
+           <string>Contrast</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QGroupBox" name="groupBox_4">
+             <property name="title">
+              <string>Contrast</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QSlider" name="horizontalSlider">
+                <property name="value">
+                 <number>50</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="brightness">
+          <attribute name="title">
+           <string>Brightness</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QGroupBox" name="groupBox_5">
+             <property name="title">
+              <string>Brightness</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <item>
+               <widget class="QSlider" name="horizontalSlider_2">
+                <property name="sliderPosition">
+                 <number>50</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="saturation">
+          <attribute name="title">
+           <string>Saturation</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <widget class="QGroupBox" name="groupBox_6">
+             <property name="title">
+              <string>Saturation</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <item>
+               <widget class="QSlider" name="horizontalSlider_3">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTabWidget" name="Layers">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="layers">
+          <property name="accessibleName">
+           <string/>
+          </property>
+          <attribute name="title">
+           <string>Layers</string>
+          </attribute>
+         </widget>
+         <widget class="QWidget" name="histogram">
+          <attribute name="title">
+           <string>Histogram</string>
+          </attribute>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -88,6 +291,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionClose"/>
     <addaction name="actionclear"/>
+    <addaction name="actionExport"/>
    </widget>
    <widget class="QMenu" name="menucolor">
     <property name="title">
@@ -106,6 +310,8 @@
     <addaction name="actionsuma"/>
     <addaction name="actionroznica"/>
     <addaction name="actioniloczyn"/>
+    <addaction name="actionlayers"/>
+    <addaction name="actionhistogram"/>
    </widget>
    <addaction name="menufile"/>
    <addaction name="menucolor"/>
@@ -124,6 +330,7 @@
    </attribute>
    <addaction name="actionopen"/>
    <addaction name="actionSave"/>
+   <addaction name="actionExport"/>
    <addaction name="actionclear"/>
    <addaction name="actionClose"/>
   </widget>
@@ -201,6 +408,25 @@
   <action name="actioniloczyn">
    <property name="text">
     <string>product</string>
+   </property>
+  </action>
+  <action name="actionlayers">
+   <property name="text">
+    <string>layers</string>
+   </property>
+  </action>
+  <action name="actionhistogram">
+   <property name="text">
+    <string>histogram</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/res/img/save.png</normaloff>:/res/img/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export</string>
    </property>
   </action>
  </widget>
