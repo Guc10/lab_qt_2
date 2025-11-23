@@ -6,5 +6,9 @@
         <file>img/save.png</file>
         <file>img/clearStyling.png</file>
         <file>img/export.png</file>
+        <file>img/brightness.png</file>
+        <file>img/contrast.png</file>
+        <file>img/negative.png</file>
+        <file>img/saturation.png</file>
     </qresource>
 </RCC>

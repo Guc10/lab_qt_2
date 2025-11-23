@@ -335,28 +335,55 @@
    <addaction name="actionClear_canvas"/>
    <addaction name="actionClear_styling"/>
    <addaction name="actionExit"/>
+   <addaction name="separator"/>
+   <addaction name="actiondesaturation"/>
+   <addaction name="actionnegatyw"/>
+   <addaction name="actionkontrast"/>
+   <addaction name="actionjasnosc"/>
+   <addaction name="actionnasycenie"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actiondesaturation">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/res/img/saturation.png</normaloff>:/res/img/saturation.png</iconset>
+   </property>
    <property name="text">
     <string>desaturation</string>
    </property>
   </action>
   <action name="actionnegatyw">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/res/img/negative.png</normaloff>:/res/img/negative.png</iconset>
+   </property>
    <property name="text">
     <string>negative</string>
    </property>
   </action>
   <action name="actionkontrast">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/res/img/contrast.png</normaloff>:/res/img/contrast.png</iconset>
+   </property>
    <property name="text">
     <string>contrast</string>
    </property>
   </action>
   <action name="actionjasnosc">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/res/img/brightness.png</normaloff>:/res/img/brightness.png</iconset>
+   </property>
    <property name="text">
     <string>brightness</string>
    </property>
   </action>
   <action name="actionnasycenie">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/res/img/saturation.png</normaloff>:/res/img/saturation.png</iconset>
+   </property>
    <property name="text">
     <string>saturation</string>
    </property>
