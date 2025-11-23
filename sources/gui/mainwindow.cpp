@@ -13,18 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
     setupConnections();
 
     ui->desaturation_slider->setRange(0, 100);
-    ui->desaturation_slider->setValue(0);
-
     ui->horizontalSlider->setRange(50, 150);
-    ui->horizontalSlider->setValue(100);
-
     ui->horizontalSlider_2->setRange(-100, 100);
-    ui->horizontalSlider_2->setValue(0);
-
     ui->horizontalSlider_3->setRange(0, 200);
-    ui->horizontalSlider_3->setValue(100);
 
-    updateImageInfo();
+    resetSliders();
+    updateImageDisplay();
 }
 
 MainWindow::~MainWindow() {
@@ -32,11 +26,12 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::setupConnections() {
-    connect(ui->actionopen, &QAction::triggered, this, &MainWindow::onActionOpenTriggered);
+    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::onActionOpenTriggered);
     connect(ui->actionSave, &QAction::triggered, this, &MainWindow::onActionSaveTriggered);
     connect(ui->actionExport, &QAction::triggered, this, &MainWindow::onActionExportTriggered);
-    connect(ui->actionClose, &QAction::triggered, this, &MainWindow::onActionCloseTriggered);
-    connect(ui->actionclear, &QAction::triggered, this, &MainWindow::onActionClearTriggered);
+    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onActionCloseTriggered);
+    connect(ui->actionClear_styling, &QAction::triggered, this, &MainWindow::onActionClearStylingTriggered);
+    connect(ui->actionClear_canvas, &QAction::triggered, this, &MainWindow::onActionClearCanvasTriggered);
 
     connect(ui->desaturation_slider, &QSlider::valueChanged, this, &MainWindow::onGrayscaleSliderValueChanged);
     connect(ui->checkBox, &QCheckBox::checkStateChanged, this, &MainWindow::onNegativeCheckboxStateChanged);
@@ -44,8 +39,16 @@ void MainWindow::setupConnections() {
     connect(ui->horizontalSlider_2, &QSlider::valueChanged, this, &MainWindow::onBrightnessSliderValueChanged);
     connect(ui->horizontalSlider_3, &QSlider::valueChanged, this, &MainWindow::onSaturationSliderValueChanged);
 
-    connect(ui->Operations, &QTabWidget::currentChanged, this, &MainWindow::onOperationsTabChanged);
+    int index = 1;
+    foreach (QAction *action, ui->menucolor->actions()) {
+        connect(action, &QAction::triggered, this, [this, index]() {
+            ui->Operations->setCurrentIndex(index);
+        });
+        index++;
+    }
 }
+
+// Updating Image, Image Info
 
 void MainWindow::updateImageInfo() {
     if (m_imageProcessor.hasImage()) {
@@ -53,16 +56,16 @@ void MainWindow::updateImageInfo() {
         QImage image = m_imageProcessor.getCurrentImage();
 
         QString infoText = QString(
-                               "File Name: %1\n"
-                               "Image Size: %2 x %3 pixels\n"
-                               "File Format: %4\n"
-                               "File Size: %5 bytes\n"
-                               "Modified: %6"
-                               ).arg(fileInfo.fileName())
-                               .arg(image.width()).arg(image.height())
-                               .arg(fileInfo.suffix().toUpper())
-                               .arg(fileInfo.size())
-                               .arg(m_imageProcessor.hasUnsavedChanges() ? "Yes" : "No");
+           "File Name: %1\n"
+           "Image Size: %2 x %3 pixels\n"
+           "File Format: %4\n"
+           "File Size: %5 bytes\n"
+           "Modified: %6"
+           ).arg(fileInfo.fileName())
+           .arg(image.width()).arg(image.height())
+           .arg(fileInfo.suffix().toUpper())
+           .arg(fileInfo.size())
+           .arg(m_imageProcessor.hasUnsavedChanges() ? "Yes" : "No");
 
         ui->imageType->setText(infoText);
     } else {
@@ -71,40 +74,35 @@ void MainWindow::updateImageInfo() {
 }
 
 void MainWindow::updateImageDisplay() {
+    QImage image = m_imageProcessor.getCurrentImage();
+    QPixmap pixmap = QPixmap::fromImage(image);
+
+    //pixmap = pixmap.scaled(ui->imageLabel->width(), ui->imageLabel->height(),
+    //    Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    ui->imageLabel->setPixmap(pixmap);
+
     if (m_imageProcessor.hasImage()) {
-        QImage image = m_imageProcessor.getCurrentImage();
-        QPixmap pixmap = QPixmap::fromImage(image);
-
-        pixmap = pixmap.scaled(ui->imageLabel->width(), ui->imageLabel->height(),
-                               Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-        ui->imageLabel->setPixmap(pixmap);
-        updateImageInfo();
-
         ui->actionSave->setEnabled(m_imageProcessor.hasUnsavedChanges());
         ui->actionExport->setEnabled(true);
     } else {
-        ui->imageLabel->clear();
-        ui->imageLabel->setText("No image loaded");
-        updateImageInfo();
-
         ui->actionSave->setEnabled(false);
         ui->actionExport->setEnabled(false);
     }
+
+    updateImageInfo();
 }
+
+// Actions on trigger
 
 void MainWindow::onActionOpenTriggered() {
     QString filePath = QFileDialog::getOpenFileName(this,
-                                                    "Open Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.pnm *.pbm *.pgm *.ppm)");
+        "Open Image", "", "*.png *.jpg *.jpeg *.bmp *.pnm *.pbm *.pgm *.ppm");
 
     if (!filePath.isEmpty()) {
         if (m_imageProcessor.loadImage(filePath)) {
-            ui->desaturation_slider->setValue(0);
-            ui->checkBox->setChecked(false);
-            ui->horizontalSlider->setValue(100);
-            ui->horizontalSlider_2->setValue(0);
-            ui->horizontalSlider_3->setValue(100);
 
+            resetSliders();
             updateImageDisplay();
         }
     }
@@ -121,7 +119,7 @@ void MainWindow::onActionSaveTriggered() {
 
 void MainWindow::onActionExportTriggered() {
     QString filePath = QFileDialog::getSaveFileName(this,
-                                                    "Export Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.pnm)");
+        "Export Image", "", "*.png *.jpg *.jpeg *.bmp *.pnm *.pbm *.pgm *.ppm");
 
     if (!filePath.isEmpty()) {
         if (m_imageProcessor.exportImage(filePath)) {
@@ -136,8 +134,8 @@ void MainWindow::onActionExportTriggered() {
 void MainWindow::onActionCloseTriggered() {
     if (m_imageProcessor.hasUnsavedChanges()) {
         QMessageBox::StandardButton reply = QMessageBox::question(this,
-                                                                  "Unsaved Changes", "You have unsaved changes. Are you sure you want to close?",
-                                                                  QMessageBox::Yes | QMessageBox::No);
+          "Unsaved Changes", "You have unsaved changes. Are you sure you want to close?",
+          QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::No) {
             return;
@@ -146,10 +144,21 @@ void MainWindow::onActionCloseTriggered() {
     close();
 }
 
-void MainWindow::onActionClearTriggered() {
-    m_imageProcessor.resetToOriginal();
+void MainWindow::onActionClearStylingTriggered() {
+    if(!m_imageProcessor.hasUnsavedChanges()) updateStatusBat("Nothing to clear", 5000);
+    else m_imageProcessor.resetToOriginal();
+    resetSliders();
     updateImageDisplay();
 }
+
+void MainWindow::onActionClearCanvasTriggered() {
+    if(!m_imageProcessor.hasImage()) updateStatusBat("Canvas is already cleared", 5000);
+    else m_imageProcessor.clearImage();
+    resetSliders();
+    updateImageDisplay();
+}
+
+// Updating data depending on sliders positions
 
 void MainWindow::onGrayscaleSliderValueChanged(int value) {
     if (!m_imageProcessor.hasImage()) return;
@@ -213,6 +222,26 @@ void MainWindow::onSaturationSliderValueChanged(int value) {
     updateImageDisplay();
 }
 
-void MainWindow::onOperationsTabChanged(int index) {
-    Q_UNUSED(index)
+// Updating active tabs
+
+void MainWindow::onMenuBarSelection(int index) {
+    ui->Operations->setCurrentIndex(index);
+}
+
+// Updatig status bar
+
+void MainWindow::updateStatusBat(QString param, int period) {
+    ui->statusbar->clearMessage();
+    ui->statusbar->showMessage(param, period);
+}
+
+// Reseting sliders
+
+void MainWindow::resetSliders() {
+    onMenuBarSelection(0);
+    ui->desaturation_slider->setValue(0);
+    ui->checkBox->setChecked(false);
+    ui->horizontalSlider->setValue(100);
+    ui->horizontalSlider_2->setValue(0);
+    ui->horizontalSlider_3->setValue(100);
 }

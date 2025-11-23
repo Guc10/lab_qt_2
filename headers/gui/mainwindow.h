@@ -22,6 +22,8 @@ private:
     void setupConnections();
     void updateImageInfo();
     void updateImageDisplay();
+    void resetSliders();
+    void updateStatusBat(QString param, int period);
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -33,7 +35,8 @@ private slots:
     void onActionSaveTriggered();
     void onActionExportTriggered();
     void onActionCloseTriggered();
-    void onActionClearTriggered();
+    void onActionClearStylingTriggered();
+    void onActionClearCanvasTriggered();
 
     // Filter operations
     void onGrayscaleSliderValueChanged(int value);
@@ -43,7 +46,7 @@ private slots:
     void onSaturationSliderValueChanged(int value);
 
     // Tab changes
-    void onOperationsTabChanged(int index);
+    void onMenuBarSelection(int index);
 };
 
 #endif

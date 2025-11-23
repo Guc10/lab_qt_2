@@ -58,6 +58,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${FORMS}
         resource.qrc
         mainwindow.ui
+        readme.md
     )
 
     # KLUCZOWE: Ustawienie ścieżek include dla targetu

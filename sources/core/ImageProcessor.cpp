@@ -69,6 +69,11 @@ void ImageProcessor::resetToOriginal() {
     }
 }
 
+void ImageProcessor::clearImage() {
+    m_currentImage = QImage();
+    m_originalImage = QImage();
+}
+
 bool ImageProcessor::hasUnsavedChanges() const {
     return m_isModified;
 }

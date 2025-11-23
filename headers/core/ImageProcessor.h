@@ -24,6 +24,7 @@ public:
     void applyFilter(std::unique_ptr<IImageFilter> filter);
     void convertImage(std::unique_ptr<IImageConverter> converter, const QString& format);
     void resetToOriginal();
+    void clearImage();
     bool hasUnsavedChanges() const;
     QString getCurrentPath() const;
     QImage getCurrentImage() const;

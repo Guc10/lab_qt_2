@@ -7,7 +7,7 @@ QImage ImageFileHandler::load(const QString& filePath) {
 
     if (!image.load(filePath)) {
         QMessageBox::warning(nullptr, "Load Error",
-                             "Cannot load image: " + filePath);
+            "Cannot load image: " + filePath);
         return QImage();
     }
 
@@ -17,7 +17,7 @@ QImage ImageFileHandler::load(const QString& filePath) {
 bool ImageFileHandler::save(const QImage& image, const QString& filePath) {
     if (!image.save(filePath)) {
         QMessageBox::warning(nullptr, "Save Error",
-                             "Cannot save image: " + filePath);
+            "Cannot save image: " + filePath);
         return false;
     }
 
