@@ -5,7 +5,7 @@
 
 class PNMImageConverter : public IImageConverter {
 public:
-    QImage convert(const QImage& image, const QString& format) override;
+    QImage convertImage(const QImage& image, const QString& format) override;
 };
 
 #endif

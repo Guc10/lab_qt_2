@@ -59,6 +59,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         resource.qrc
         mainwindow.ui
         readme.md
+        sources/converters/Convert.cpp
+        headers/converters/Convert.h
     )
 
     # KLUCZOWE: Ustawienie ścieżek include dla targetu

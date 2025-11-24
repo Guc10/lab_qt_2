@@ -1,6 +1,9 @@
 #include "headers/gui/mainwindow.h"
 #include "../../ui_mainwindow.h"
 #include "headers/core/FilterFactory.h"
+
+#include "headers/converters/Convert.h"
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFileInfo>
@@ -60,11 +63,13 @@ void MainWindow::updateImageInfo() {
            "Image Size: %2 x %3 pixels\n"
            "File Format: %4\n"
            "File Size: %5 bytes\n"
-           "Modified: %6"
+           "Magic type: p%6\n"
+           "Modified: %7"
            ).arg(fileInfo.fileName())
            .arg(image.width()).arg(image.height())
            .arg(fileInfo.suffix().toUpper())
            .arg(fileInfo.size())
+           .arg(m_imageProcessor.getCurrentMagicType())
            .arg(m_imageProcessor.hasUnsavedChanges() ? "Yes" : "No");
 
         ui->imageType->setText(infoText);
@@ -118,16 +123,110 @@ void MainWindow::onActionSaveTriggered() {
 }
 
 void MainWindow::onActionExportTriggered() {
-    QString filePath = QFileDialog::getSaveFileName(this,
-        "Export Image", "", "*.png *.jpg *.jpeg *.bmp *.pnm *.pbm *.pgm *.ppm");
+    std::unique_ptr<IImageConverter> converter;
+    QString suffix = m_imageProcessor.getCurrentSufix();
+    QString selectedFilter;
 
-    if (!filePath.isEmpty()) {
-        if (m_imageProcessor.exportImage(filePath)) {
-            QMessageBox::information(this, "Success", "Image exported successfully");
-            updateImageInfo();
-        } else {
-            QMessageBox::warning(this, "Error", "Failed to export image");
+    QString filePath;
+
+    PNM magicType;
+    PNM newMagicType;
+
+    bool conversionNeeded;
+
+    if (m_imageProcessor.isPNM()) {
+        magicType = m_imageProcessor.getCurrentMagicType();
+        switch (magicType) {
+        case 1:
+            selectedFilter = "PBM Binary Image (*.pbm);;PBM ASCII Image (*.pbm)";
+            break;
+        case 2:
+            selectedFilter = "PGM Binary Image (*.pgm);;PGM ASCII Image (*.pgm)";
+            break;
+        case 3:
+            selectedFilter = "PPM Binary Image (*.ppm);;PPM ASCII Image (*.ppm)";
+            break;
+        case 4:
+            selectedFilter = "PBM Binary Image (*.pbm);;PBM ASCII Image (*.pbm)";
+            break;
+        case 5:
+            selectedFilter = "PGM Binary Image (*.pgm);;PGM ASCII Image (*.pgm)";
+            break;
+        case 6:
+            selectedFilter = "PPM Binary Image (*.ppm);;PPM ASCII Image (*.ppm)";
+            break;
+        default:
+            break;
         }
+
+        filePath = QFileDialog::getSaveFileName(this,
+            "Export Image",
+            "",
+            selectedFilter,
+            &selectedFilter);
+
+        if (filePath.isEmpty()) {
+            return;
+        }
+
+        if (selectedFilter.contains("PBM Binary")) {
+            newMagicType = p4;
+            selectedFilter = "p4";
+        } else if (selectedFilter.contains("PGM Binary")) {
+            newMagicType = p5;
+            selectedFilter = "p5";
+        } else if (selectedFilter.contains("PPM Binary")) {
+            newMagicType = p6;
+            selectedFilter = "p6";
+        }else if (selectedFilter.contains("PBM ASCII")) {
+            newMagicType = p1;
+            selectedFilter = "p1";
+        } else if (selectedFilter.contains("PGM ASCII")) {
+            newMagicType = p2;
+            selectedFilter = "p2";
+        } else if (selectedFilter.contains("PPM ASCII")) {
+            newMagicType = p3;
+            selectedFilter = "p3";
+        }
+
+        conversionNeeded = (magicType != newMagicType);
+
+        if(conversionNeeded){
+            converter = Convert::convertPNMImage();
+            m_imageProcessor.convertImage(std::move(converter), selectedFilter);
+        }
+    } else {
+        filePath = QFileDialog::getSaveFileName(this,
+            "Export Image",
+            "",
+            "PNG Image (*.png);;JPEG Image (*.jpg *.jpeg);;BMP Image (*.bmp)",
+            &selectedFilter);
+
+        if (filePath.isEmpty()) {
+            return;
+        }
+
+        if (selectedFilter.contains("*.png")) {
+            selectedFilter = "png";
+        } else if (selectedFilter.contains("*.jpg") || selectedFilter.contains("*.jpeg")) {
+            selectedFilter = "jpg";
+        } else if (selectedFilter.contains("*.bmp")) {
+            selectedFilter = "bmp";
+        }
+
+        conversionNeeded = (selectedFilter != suffix);
+
+        if(conversionNeeded){
+            converter = Convert::convertNormalImage();
+            m_imageProcessor.convertImage(std::move(converter), selectedFilter);
+        }
+    }
+
+    if (m_imageProcessor.exportImage(filePath)) {
+        QMessageBox::information(this, "Success", "Image exported successfully");
+        updateImageInfo();
+    } else {
+        QMessageBox::warning(this, "Error", "Failed to export image");
     }
 }
 
