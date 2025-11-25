@@ -70,10 +70,10 @@ void ImageProcessor::applyFilter(std::unique_ptr<IImageFilter> filter) {
     m_isModified = true;
 }
 
-void ImageProcessor::convertImage(std::unique_ptr<IImageConverter> converter, const QString& format) {
+void ImageProcessor::convertImage(std::unique_ptr<IImageConverter> converter, const QString& format, const QString& filePath) {
     if (m_currentImage.isNull()) return;
 
-    m_currentImage = converter->convertImage(m_currentImage, format);
+    m_currentImage = converter->convertImage(m_currentImage, format, filePath);
 
     if(format == "p1"){
         m_PNMType = p1;
@@ -91,6 +91,7 @@ void ImageProcessor::convertImage(std::unique_ptr<IImageConverter> converter, co
         m_PNMType = undefined;
         m_suffix = format;
     }
+    m_currentPath = filePath;
     m_isModified = true;
 }
 

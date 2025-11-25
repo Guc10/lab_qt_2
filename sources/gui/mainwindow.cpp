@@ -36,11 +36,11 @@ void MainWindow::setupConnections() {
     connect(ui->actionClear_styling, &QAction::triggered, this, &MainWindow::onActionClearStylingTriggered);
     connect(ui->actionClear_canvas, &QAction::triggered, this, &MainWindow::onActionClearCanvasTriggered);
 
-    connect(ui->desaturation_slider, &QSlider::valueChanged, this, &MainWindow::onGrayscaleSliderValueChanged);
-    connect(ui->checkBox, &QCheckBox::checkStateChanged, this, &MainWindow::onNegativeCheckboxStateChanged);
-    connect(ui->horizontalSlider, &QSlider::valueChanged, this, &MainWindow::onContrastSliderValueChanged);
-    connect(ui->horizontalSlider_2, &QSlider::valueChanged, this, &MainWindow::onBrightnessSliderValueChanged);
-    connect(ui->horizontalSlider_3, &QSlider::valueChanged, this, &MainWindow::onSaturationSliderValueChanged);
+    connect(ui->desaturation_btn, &QPushButton::clicked, this, &MainWindow::onGrayscaleApply);
+    connect(ui->checkBox, &QCheckBox::checkStateChanged, this, &MainWindow::onNegativeCheckboxStateChange);
+    connect(ui->contrast_btn, &QPushButton::clicked, this, &MainWindow::onContrastApply);
+    connect(ui->brightness_btn, &QPushButton::clicked, this, &MainWindow::onBrightnessApply);
+    connect(ui->saturation_btn, &QPushButton::clicked, this, &MainWindow::onSaturationApply);
 
     int index = 1;
     foreach (QAction *action, ui->menucolor->actions()) {
@@ -57,19 +57,20 @@ void MainWindow::updateImageInfo() {
     if (m_imageProcessor.hasImage()) {
         QFileInfo fileInfo(m_imageProcessor.getCurrentPath());
         QImage image = m_imageProcessor.getCurrentImage();
+        QString magicType = QString("Magic type: p%1").arg(m_imageProcessor.getCurrentMagicType());
 
         QString infoText = QString(
            "File Name: %1\n"
            "Image Size: %2 x %3 pixels\n"
            "File Format: %4\n"
            "File Size: %5 bytes\n"
-           "Magic type: p%6\n"
+           "%6\n"
            "Modified: %7"
            ).arg(fileInfo.fileName())
            .arg(image.width()).arg(image.height())
            .arg(fileInfo.suffix().toUpper())
            .arg(fileInfo.size())
-           .arg(m_imageProcessor.getCurrentMagicType())
+           .arg((m_imageProcessor.getCurrentMagicType() == 0) ? "Not a magic type image" : magicType)
            .arg(m_imageProcessor.hasUnsavedChanges() ? "Yes" : "No");
 
         ui->imageType->setText(infoText);
@@ -191,10 +192,71 @@ void MainWindow::onActionExportTriggered() {
 
         conversionNeeded = (magicType != newMagicType);
 
-        if(conversionNeeded){
-            converter = Convert::convertPNMImage();
-            m_imageProcessor.convertImage(std::move(converter), selectedFilter);
+        converter = Convert::convertPNMImage();
+        m_imageProcessor.convertImage(std::move(converter), selectedFilter, filePath);
+
+        QImage img = m_imageProcessor.getCurrentImage();
+
+        if (selectedFilter == "p1") {
+            img = img.convertToFormat(QImage::Format_Mono);
+            QFile out(filePath);
+            if(!out.open(QIODevice::WriteOnly | QIODevice::Text))
+                QMessageBox::warning(nullptr, "Export error",
+                                     "Cannot save image: " + filePath);
+            QTextStream stream(&out);
+            stream << "P1\n" << img.width() << " " << img.height() << "\n";
+            for (int y = 0; y < img.height(); ++y) {
+                for (int x = 0; x < img.width(); ++x)
+                    stream << ((qGray(img.pixel(x, y)) < 128) ? 1 : 0) << " ";
+                stream << "\n";
+            }
+            out.close();
+        }else if (selectedFilter == "p2") {
+            img = img.convertToFormat(QImage::Format_Grayscale8);
+            QFile out(filePath);
+            if(!out.open(QIODevice::WriteOnly | QIODevice::Text))
+                QMessageBox::warning(nullptr, "Export error",
+                                     "Cannot save image: " + filePath);
+            QTextStream stream(&out);
+            stream << "P2\n" << img.width() << " " << img.height() << "\n255\n";
+            for (int y = 0; y < img.height(); ++y) {
+                const uchar *line = img.constScanLine(y);
+                for (int x = 0; x < img.width(); ++x)
+                    stream << QString::number(line[x]) << " ";
+                stream << "\n";
+            }
+            out.close();
+        }else if (selectedFilter== "p3") {
+            img = img.convertToFormat(QImage::Format_RGB888);
+            QFile out(filePath);
+            if(!out.open(QIODevice::WriteOnly | QIODevice::Text))
+                QMessageBox::warning(nullptr, "Export error",
+                                     "Cannot save image: " + filePath);
+            QTextStream stream(&out);
+            stream << "P3\n" << img.width() << " " << img.height() << "\n255\n";
+            for (int y = 0; y < img.height(); ++y) {
+                const uchar *line = img.constScanLine(y);
+                for (int x = 0; x < img.width(); ++x) {
+                    int i = x * 3;
+                    stream << QString::number(line[i]) << " "
+                           << QString::number(line[i + 1]) << " "
+                           << QString::number(line[i + 2]) << " ";
+                }
+                stream << "\n";
+            }
+            out.close();
+        }else{
+            if (m_imageProcessor.exportImage(filePath)) {
+                QMessageBox::information(this, "Success", "Image exported successfully");
+                updateImageInfo();
+            } else {
+                QMessageBox::warning(this, "Error", "Failed to export image");
+            }
+            return;
         }
+        QMessageBox::information(this, "Success", "Image exported successfully");
+        updateImageInfo();
+
     } else {
         filePath = QFileDialog::getSaveFileName(this,
             "Export Image",
@@ -218,15 +280,15 @@ void MainWindow::onActionExportTriggered() {
 
         if(conversionNeeded){
             converter = Convert::convertNormalImage();
-            m_imageProcessor.convertImage(std::move(converter), selectedFilter);
+            m_imageProcessor.convertImage(std::move(converter), selectedFilter, filePath);
         }
-    }
 
-    if (m_imageProcessor.exportImage(filePath)) {
-        QMessageBox::information(this, "Success", "Image exported successfully");
-        updateImageInfo();
-    } else {
-        QMessageBox::warning(this, "Error", "Failed to export image");
+        if (m_imageProcessor.exportImage(filePath)) {
+            QMessageBox::information(this, "Success", "Image exported successfully");
+            updateImageInfo();
+        } else {
+            QMessageBox::warning(this, "Error", "Failed to export image");
+        }
     }
 }
 
@@ -259,10 +321,12 @@ void MainWindow::onActionClearCanvasTriggered() {
 
 // Updating data depending on sliders positions
 
-void MainWindow::onGrayscaleSliderValueChanged(int value) {
+void MainWindow::onGrayscaleApply() {
+    int value = ui->desaturation_slider->value();
+
     if (!m_imageProcessor.hasImage()) return;
 
-    m_imageProcessor.resetToOriginal();
+    //m_imageProcessor.resetToOriginal();
 
     if (value > 0) {
         double intensity = value / 100.0;
@@ -273,10 +337,10 @@ void MainWindow::onGrayscaleSliderValueChanged(int value) {
     updateImageDisplay();
 }
 
-void MainWindow::onNegativeCheckboxStateChanged(int state) {
+void MainWindow::onNegativeCheckboxStateChange(int state) {
     if (!m_imageProcessor.hasImage()) return;
 
-    m_imageProcessor.resetToOriginal();
+    //m_imageProcessor.resetToOriginal();
 
     if (state == Qt::Checked) {
         auto filter = FilterFactory::createNegativeFilter();
@@ -286,10 +350,12 @@ void MainWindow::onNegativeCheckboxStateChanged(int state) {
     updateImageDisplay();
 }
 
-void MainWindow::onContrastSliderValueChanged(int value) {
+void MainWindow::onContrastApply() {
+    int value = ui->horizontalSlider->value();
+
     if (!m_imageProcessor.hasImage()) return;
 
-    m_imageProcessor.resetToOriginal();
+    //m_imageProcessor.resetToOriginal();
 
     double contrast = value / 100.0;
     auto filter = FilterFactory::createContrastFilter(contrast);
@@ -298,10 +364,12 @@ void MainWindow::onContrastSliderValueChanged(int value) {
     updateImageDisplay();
 }
 
-void MainWindow::onBrightnessSliderValueChanged(int value) {
+void MainWindow::onBrightnessApply() {
+    int value = ui->horizontalSlider_2->value();
+
     if (!m_imageProcessor.hasImage()) return;
 
-    m_imageProcessor.resetToOriginal();
+    //m_imageProcessor.resetToOriginal();
 
     auto filter = FilterFactory::createBrightnessFilter(value);
     m_imageProcessor.applyFilter(std::move(filter));
@@ -309,10 +377,12 @@ void MainWindow::onBrightnessSliderValueChanged(int value) {
     updateImageDisplay();
 }
 
-void MainWindow::onSaturationSliderValueChanged(int value) {
+void MainWindow::onSaturationApply() {
+    int value = ui->horizontalSlider_3->value();
+
     if (!m_imageProcessor.hasImage()) return;
 
-    m_imageProcessor.resetToOriginal();
+    //m_imageProcessor.resetToOriginal();
 
     double saturation = value / 100.0;
     auto filter = FilterFactory::createSaturationFilter(saturation);

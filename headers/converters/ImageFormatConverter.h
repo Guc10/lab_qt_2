@@ -5,7 +5,7 @@
 
 class ImageFormatConverter : public IImageConverter {
 public:
-    QImage convertImage(const QImage& image, const QString& format) override;
+    QImage convertImage(const QImage& image, const QString& format, const QString& filePath) override;
 };
 
 #endif

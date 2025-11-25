@@ -39,11 +39,11 @@ private slots:
     void onActionClearCanvasTriggered();
 
     // Filter operations
-    void onGrayscaleSliderValueChanged(int value);
-    void onNegativeCheckboxStateChanged(int state);
-    void onContrastSliderValueChanged(int value);
-    void onBrightnessSliderValueChanged(int value);
-    void onSaturationSliderValueChanged(int value);
+    void onGrayscaleApply();
+    void onNegativeCheckboxStateChange(int state);
+    void onContrastApply();
+    void onBrightnessApply();
+    void onSaturationApply();
 
     // Tab changes
     void onMenuBarSelection(int index);

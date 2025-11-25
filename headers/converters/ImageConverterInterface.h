@@ -7,7 +7,7 @@
 class IImageConverter {
 public:
     virtual ~IImageConverter() = default;
-    virtual QImage convertImage(const QImage& image, const QString& format) = 0;
+    virtual QImage convertImage(const QImage& image, const QString& format, const QString& filePath) = 0;
 };
 
 #endif

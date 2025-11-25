@@ -36,7 +36,7 @@ public:
     bool saveImage();
     bool exportImage(const QString& newFilePath);
     void applyFilter(std::unique_ptr<IImageFilter> filter);
-    void convertImage(std::unique_ptr<IImageConverter> converter, const QString& format);
+    void convertImage(std::unique_ptr<IImageConverter> converter, const QString& format, const QString& filePath);
     void resetToOriginal();
     void clearImage();
     bool hasUnsavedChanges() const;
