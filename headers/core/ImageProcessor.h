@@ -34,6 +34,7 @@ public:
     bool loadImage(const QString& filePath);
     bool saveImage();
     bool exportImage(const QString& newFilePath);
+    bool exportPNM(const QString& newFilePath, const QString& magic, bool ascii);
     void applyFilter(std::unique_ptr<IImageFilter> filter);
     void resetToOriginal();
     void clearImage();

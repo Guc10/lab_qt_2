@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QApplication>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -41,15 +42,14 @@ void MainWindow::setupConnections() {
     connect(ui->saturation_btn, &QPushButton::clicked, this, &MainWindow::onSaturationApply);
 
     int index = 1;
-    foreach (QAction *action, ui->menucolor->actions()) {
-        connect(action, &QAction::triggered, this, [this, index]() {
-            ui->Operations->setCurrentIndex(index);
+    for (QAction *action : ui->menucolor->actions()) {
+        int idx = index;
+        connect(action, &QAction::triggered, this, [this, idx]() {
+            ui->Operations->setCurrentIndex(idx);
         });
-        index++;
+        ++index;
     }
 }
-
-// Updating Image, Image Info
 
 void MainWindow::updateImageInfo() {
     if (m_imageProcessor.hasImage()) {
@@ -79,189 +79,113 @@ void MainWindow::updateImageInfo() {
 
 void MainWindow::updateImageDisplay() {
     QImage image = m_imageProcessor.getCurrentImage();
-    QPixmap pixmap = QPixmap::fromImage(image);
-
-    ui->imageLabel->setPixmap(pixmap);
-
-    if (m_imageProcessor.hasImage()) {
-        ui->actionSave->setEnabled(m_imageProcessor.hasUnsavedChanges());
-        ui->actionExport->setEnabled(true);
+    if (!image.isNull()) {
+        ui->imageLabel->setPixmap(QPixmap::fromImage(image));
     } else {
-        ui->actionSave->setEnabled(false);
-        ui->actionExport->setEnabled(false);
+        ui->imageLabel->clear();
     }
+
+    ui->actionSave->setEnabled(m_imageProcessor.hasImage() && m_imageProcessor.hasUnsavedChanges());
+    ui->actionExport->setEnabled(m_imageProcessor.hasImage());
 
     updateImageInfo();
 }
-
-// Actions on trigger
 
 void MainWindow::onActionOpenTriggered() {
     QString filePath = QFileDialog::getOpenFileName(this,
         "Open Image", "", "*.png *.jpg *.jpeg *.bmp *.pnm *.pbm *.pgm *.ppm");
 
-    if (!filePath.isEmpty()) {
-        if (m_imageProcessor.loadImage(filePath)) {
+    if (filePath.isEmpty()) return;
 
-            resetSliders();
-            updateImageDisplay();
-        }
+    ui->statusbar->showMessage("Loading image...", 2000);
+    QApplication::processEvents();
+
+    if (m_imageProcessor.loadImage(filePath)) {
+        resetSliders();
+        updateImageDisplay();
+        ui->statusbar->showMessage("Image loaded", 3000);
+    } else {
+        QMessageBox::warning(this, "Load Error", "Failed to load image: " + filePath);
+        ui->statusbar->showMessage("Failed to load image", 3000);
     }
 }
 
 void MainWindow::onActionSaveTriggered() {
+    if (!m_imageProcessor.hasImage()) {
+        ui->statusbar->showMessage("No image to save", 3000);
+        return;
+    }
+
+    ui->statusbar->showMessage("Saving image...", 2000);
+    QApplication::processEvents();
+
     if (m_imageProcessor.saveImage()) {
         QMessageBox::information(this, "Success", "Image saved successfully");
         updateImageInfo();
+        ui->statusbar->showMessage("Image saved", 3000);
     } else {
         QMessageBox::warning(this, "Error", "Failed to save image");
+        ui->statusbar->showMessage("Save failed", 3000);
     }
 }
 
 void MainWindow::onActionExportTriggered() {
-    QString suffix = m_imageProcessor.getCurrentSufix();
-    QString selectedFilter;
-    QString filePath;
-    PNM magicType;
+    if (!m_imageProcessor.hasImage()) {
+        ui->statusbar->showMessage("No image to export", 3000);
+        return;
+    }
 
-    bool conversionNeeded;
-
+    // If current file is PNM, offer ASCII/BINARY p1..p6 variants
     if (m_imageProcessor.isPNM()) {
-        magicType = m_imageProcessor.getCurrentMagicType();
-        switch (magicType) {
-        case 1:
-            selectedFilter = "PBM Binary Image (*.pbm);;PBM ASCII Image (*.pbm)";
-            break;
-        case 2:
-            selectedFilter = "PGM Binary Image (*.pgm);;PGM ASCII Image (*.pgm)";
-            break;
-        case 3:
-            selectedFilter = "PPM Binary Image (*.ppm);;PPM ASCII Image (*.ppm)";
-            break;
-        case 4:
-            selectedFilter = "PBM Binary Image (*.pbm);;PBM ASCII Image (*.pbm)";
-            break;
-        case 5:
-            selectedFilter = "PGM Binary Image (*.pgm);;PGM ASCII Image (*.pgm)";
-            break;
-        case 6:
-            selectedFilter = "PPM Binary Image (*.ppm);;PPM ASCII Image (*.ppm)";
-            break;
-        default:
-            break;
-        }
-
-        filePath = QFileDialog::getSaveFileName(this,
-            "Export Image",
-            "",
-            selectedFilter,
+        QString selectedFilter;
+        QString filePath = QFileDialog::getSaveFileName(this, "Export Image", "",
+            "PBM Binary Image (*.pbm);;PBM ASCII Image (*.pbm);;PGM Binary Image (*.pgm);;PGM ASCII Image (*.pgm);;PPM Binary Image (*.ppm);;PPM ASCII Image (*.ppm)",
             &selectedFilter);
+        if (filePath.isEmpty()) return;
 
-        if (filePath.isEmpty()) {
-            return;
-        }
+        QString targetMagic;
+        bool ascii = false;
+        if (selectedFilter.contains("PBM Binary")) targetMagic = "p4";
+        else if (selectedFilter.contains("PBM ASCII")) { targetMagic = "p1"; ascii = true; }
+        else if (selectedFilter.contains("PGM Binary")) targetMagic = "p5";
+        else if (selectedFilter.contains("PGM ASCII")) { targetMagic = "p2"; ascii = true; }
+        else if (selectedFilter.contains("PPM Binary")) targetMagic = "p6";
+        else if (selectedFilter.contains("PPM ASCII")) { targetMagic = "p3"; ascii = true; }
 
-        if (selectedFilter.contains("PBM Binary")) {
-            selectedFilter = "p4";
-        } else if (selectedFilter.contains("PGM Binary")) {
-            selectedFilter = "p5";
-        } else if (selectedFilter.contains("PPM Binary")) {
-            selectedFilter = "p6";
-        }else if (selectedFilter.contains("PBM ASCII")) {
-            selectedFilter = "p1";
-        } else if (selectedFilter.contains("PGM ASCII")) {
-            selectedFilter = "p2";
-        } else if (selectedFilter.contains("PPM ASCII")) {
-            selectedFilter = "p3";
-        }
+        ui->statusbar->showMessage("Exporting image...", 0);
+        QApplication::processEvents();
 
-        QImage img = m_imageProcessor.getCurrentImage();
-
-        if (selectedFilter == "p1") {
-            img = img.convertToFormat(QImage::Format_Mono);
-            QFile out(filePath);
-            if(!out.open(QIODevice::WriteOnly | QIODevice::Text))
-                QMessageBox::warning(nullptr, "Export error",
-                                     "Cannot save image: " + filePath);
-            QTextStream stream(&out);
-            stream << "P1\n" << img.width() << " " << img.height() << "\n";
-            for (int y = 0; y < img.height(); ++y) {
-                for (int x = 0; x < img.width(); ++x)
-                    stream << ((qGray(img.pixel(x, y)) < 128) ? 1 : 0) << " ";
-                stream << "\n";
-            }
-            out.close();
-        }else if (selectedFilter == "p2") {
-            img = img.convertToFormat(QImage::Format_Grayscale8);
-            QFile out(filePath);
-            if(!out.open(QIODevice::WriteOnly | QIODevice::Text))
-                QMessageBox::warning(nullptr, "Export error",
-                                     "Cannot save image: " + filePath);
-            QTextStream stream(&out);
-            stream << "P2\n" << img.width() << " " << img.height() << "\n255\n";
-            for (int y = 0; y < img.height(); ++y) {
-                const uchar *line = img.constScanLine(y);
-                for (int x = 0; x < img.width(); ++x)
-                    stream << QString::number(line[x]) << " ";
-                stream << "\n";
-            }
-            out.close();
-        }else if (selectedFilter== "p3") {
-            img = img.convertToFormat(QImage::Format_RGB888);
-            QFile out(filePath);
-            if(!out.open(QIODevice::WriteOnly | QIODevice::Text))
-                QMessageBox::warning(nullptr, "Export error",
-                                     "Cannot save image: " + filePath);
-            QTextStream stream(&out);
-            stream << "P3\n" << img.width() << " " << img.height() << "\n255\n";
-            for (int y = 0; y < img.height(); ++y) {
-                const uchar *line = img.constScanLine(y);
-                for (int x = 0; x < img.width(); ++x) {
-                    int i = x * 3;
-                    stream << QString::number(line[i]) << " "
-                           << QString::number(line[i + 1]) << " "
-                           << QString::number(line[i + 2]) << " ";
-                }
-                stream << "\n";
-            }
-            out.close();
-        }else{
-            if (m_imageProcessor.exportImage(filePath)) {
-                QMessageBox::information(this, "Success", "Image exported successfully");
-                updateImageInfo();
-            } else {
-                QMessageBox::warning(this, "Error", "Failed to export image");
-            }
-            return;
-        }
-        QMessageBox::information(this, "Success", "Image exported successfully");
-        updateImageInfo();
-
-    } else {
-        filePath = QFileDialog::getSaveFileName(this,
-            "Export Image",
-            "",
-            "PNG Image (*.png);;JPEG Image (*.jpg *.jpeg);;BMP Image (*.bmp)",
-            &selectedFilter);
-
-        if (filePath.isEmpty()) {
-            return;
-        }
-
-        if (selectedFilter.contains("*.png")) {
-            selectedFilter = "png";
-        } else if (selectedFilter.contains("*.jpg") || selectedFilter.contains("*.jpeg")) {
-            selectedFilter = "jpg";
-        } else if (selectedFilter.contains("*.bmp")) {
-            selectedFilter = "bmp";
-        }
-
-        if (m_imageProcessor.exportImage(filePath)) {
+        if (m_imageProcessor.exportPNM(filePath, targetMagic, ascii)) {
             QMessageBox::information(this, "Success", "Image exported successfully");
             updateImageInfo();
+            ui->statusbar->showMessage("Export finished", 3000);
         } else {
             QMessageBox::warning(this, "Error", "Failed to export image");
+            ui->statusbar->showMessage("Export failed", 3000);
         }
+        return;
+    }
+
+    // Non-PNM exports: let ImageProcessor handle regular export
+    QString selected;
+    QString filePath = QFileDialog::getSaveFileName(this,
+        "Export Image",
+        "",
+        "PNG Image (*.png);;JPEG Image (*.jpg *.jpeg);;BMP Image (*.bmp)",
+        &selected);
+
+    if (filePath.isEmpty()) return;
+
+    ui->statusbar->showMessage("Exporting image...", 0);
+    QApplication::processEvents();
+
+    if (m_imageProcessor.exportImage(filePath)) {
+        QMessageBox::information(this, "Success", "Image exported successfully");
+        updateImageInfo();
+        ui->statusbar->showMessage("Export finished", 3000);
+    } else {
+        QMessageBox::warning(this, "Error", "Failed to export image");
+        ui->statusbar->showMessage("Export failed", 3000);
     }
 }
 
@@ -271,113 +195,122 @@ void MainWindow::onActionCloseTriggered() {
           "Unsaved Changes", "You have unsaved changes. Are you sure you want to close?",
           QMessageBox::Yes | QMessageBox::No);
 
-        if (reply == QMessageBox::No) {
-            return;
-        }
+        if (reply == QMessageBox::No) return;
     }
     close();
 }
 
 void MainWindow::onActionClearStylingTriggered() {
-    if(!m_imageProcessor.hasUnsavedChanges()) updateStatusBat("Nothing to clear", 5000);
-    else m_imageProcessor.resetToOriginal();
+    if (!m_imageProcessor.hasUnsavedChanges()) {
+        updateStatusBat("Nothing to clear", 5000);
+    } else {
+        m_imageProcessor.resetToOriginal();
+        updateStatusBat("Styling cleared", 3000);
+    }
     resetSliders();
     updateImageDisplay();
 }
 
 void MainWindow::onActionClearCanvasTriggered() {
-    if(!m_imageProcessor.hasImage()) updateStatusBat("Canvas is already cleared", 5000);
-    else m_imageProcessor.clearImage();
+    if (!m_imageProcessor.hasImage()) {
+        updateStatusBat("Canvas is already cleared", 5000);
+    } else {
+        m_imageProcessor.clearImage();
+        updateStatusBat("Canvas cleared", 3000);
+    }
     resetSliders();
     updateImageDisplay();
 }
 
-// Updating data depending on sliders positions
-
 void MainWindow::onGrayscaleApply() {
-    int value = ui->desaturation_slider->value();
-
     if (!m_imageProcessor.hasImage()) return;
 
-    //m_imageProcessor.resetToOriginal();
-
-    if (value > 0) {
-        double intensity = value / 100.0;
-        auto filter = FilterFactory::createSaturationFilter(1.0 - intensity);
-        m_imageProcessor.applyFilter(std::move(filter));
+    int value = ui->desaturation_slider->value();
+    if (value <= 0) {
+        updateStatusBat("No desaturation applied", 2000);
+        return;
     }
 
+    ui->statusbar->showMessage("Applying desaturation...", 0);
+    QApplication::processEvents();
+
+    double intensity = value / 100.0;
+    auto filter = FilterFactory::createSaturationFilter(1.0 - intensity);
+    m_imageProcessor.applyFilter(std::move(filter));
+
     updateImageDisplay();
+    ui->statusbar->showMessage("Desaturation applied", 3000);
 }
 
 void MainWindow::onNegativeCheckboxStateChange(int state) {
     if (!m_imageProcessor.hasImage()) return;
 
-    //m_imageProcessor.resetToOriginal();
+    ui->statusbar->showMessage(state == Qt::Checked ? "Applying negative..." : "Removing negative...", 0);
+    QApplication::processEvents();
 
     if (state == Qt::Checked) {
         auto filter = FilterFactory::createNegativeFilter();
         m_imageProcessor.applyFilter(std::move(filter));
+    } else {
+        m_imageProcessor.resetToOriginal();
     }
 
     updateImageDisplay();
+    ui->statusbar->showMessage("Operation complete", 3000);
 }
 
 void MainWindow::onContrastApply() {
-    int value = ui->horizontalSlider->value();
-
     if (!m_imageProcessor.hasImage()) return;
 
-    //m_imageProcessor.resetToOriginal();
+    ui->statusbar->showMessage("Applying contrast...", 0);
+    QApplication::processEvents();
 
+    int value = ui->horizontalSlider->value();
     double contrast = value / 100.0;
     auto filter = FilterFactory::createContrastFilter(contrast);
     m_imageProcessor.applyFilter(std::move(filter));
 
     updateImageDisplay();
+    ui->statusbar->showMessage("Contrast applied", 3000);
 }
 
 void MainWindow::onBrightnessApply() {
-    int value = ui->horizontalSlider_2->value();
-
     if (!m_imageProcessor.hasImage()) return;
 
-    //m_imageProcessor.resetToOriginal();
+    ui->statusbar->showMessage("Applying brightness...", 0);
+    QApplication::processEvents();
 
+    int value = ui->horizontalSlider_2->value();
     auto filter = FilterFactory::createBrightnessFilter(value);
     m_imageProcessor.applyFilter(std::move(filter));
 
     updateImageDisplay();
+    ui->statusbar->showMessage("Brightness applied", 3000);
 }
 
 void MainWindow::onSaturationApply() {
-    int value = ui->horizontalSlider_3->value();
-
     if (!m_imageProcessor.hasImage()) return;
 
-    //m_imageProcessor.resetToOriginal();
+    ui->statusbar->showMessage("Applying saturation...", 0);
+    QApplication::processEvents();
 
+    int value = ui->horizontalSlider_3->value();
     double saturation = value / 100.0;
     auto filter = FilterFactory::createSaturationFilter(saturation);
     m_imageProcessor.applyFilter(std::move(filter));
 
     updateImageDisplay();
+    ui->statusbar->showMessage("Saturation applied", 3000);
 }
-
-// Updating active tabs
 
 void MainWindow::onMenuBarSelection(int index) {
     ui->Operations->setCurrentIndex(index);
 }
 
-// Updatig status bar
-
 void MainWindow::updateStatusBat(QString param, int period) {
     ui->statusbar->clearMessage();
     ui->statusbar->showMessage(param, period);
 }
-
-// Reseting sliders
 
 void MainWindow::resetSliders() {
     onMenuBarSelection(0);
