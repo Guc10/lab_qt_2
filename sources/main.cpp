@@ -6,7 +6,6 @@ int main(int argc, char *argv[]) {
 
     app.setApplicationName("Image Processor");
     app.setApplicationVersion("1.0");
-
     app.setStyleSheet("QWidget { background-color: #2e2e2e; color: white } #imageLabel { background-color: white; }");
 
     MainWindow window;

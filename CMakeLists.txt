@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 4.0)
 
 project(lab_qt_5 VERSION 0.1 LANGUAGES CXX)
 
@@ -25,8 +25,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         sources/filters/NegativeFilter.cpp
         sources/filters/BrightnessAdjustmentFilter.cpp
         sources/filters/ContrastAdjustmentFilter.cpp
-        sources/converters/PNMImageConverter.cpp
-        sources/converters/ImageFormatConverter.cpp
         sources/io/ImageFileHandler.cpp
         sources/core/ImageProcessor.cpp
         sources/core/FilterFactory.cpp
@@ -41,9 +39,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         headers/filters/NegativeFilter.h
         headers/filters/BrightnessAdjustmentFilter.h
         headers/filters/ContrastAdjustmentFilter.h
-        headers/converters/ImageConverterInterface.h
-        headers/converters/PNMImageConverter.h
-        headers/converters/ImageFormatConverter.h
         headers/io/ImageFileHandlerInterface.h
         headers/io/ImageFileHandler.h
         headers/core/ImageProcessor.h
@@ -59,8 +54,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         resource.qrc
         mainwindow.ui
         readme.md
-        sources/converters/Convert.cpp
-        headers/converters/Convert.h
     )
 
     # KLUCZOWE: Ustawienie ścieżek include dla targetu

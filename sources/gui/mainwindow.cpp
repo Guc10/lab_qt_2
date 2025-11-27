@@ -2,8 +2,6 @@
 #include "../../ui_mainwindow.h"
 #include "headers/core/FilterFactory.h"
 
-#include "headers/converters/Convert.h"
-
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFileInfo>
@@ -83,9 +81,6 @@ void MainWindow::updateImageDisplay() {
     QImage image = m_imageProcessor.getCurrentImage();
     QPixmap pixmap = QPixmap::fromImage(image);
 
-    //pixmap = pixmap.scaled(ui->imageLabel->width(), ui->imageLabel->height(),
-    //    Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
     ui->imageLabel->setPixmap(pixmap);
 
     if (m_imageProcessor.hasImage()) {
@@ -124,14 +119,10 @@ void MainWindow::onActionSaveTriggered() {
 }
 
 void MainWindow::onActionExportTriggered() {
-    std::unique_ptr<IImageConverter> converter;
     QString suffix = m_imageProcessor.getCurrentSufix();
     QString selectedFilter;
-
     QString filePath;
-
     PNM magicType;
-    PNM newMagicType;
 
     bool conversionNeeded;
 
@@ -171,29 +162,18 @@ void MainWindow::onActionExportTriggered() {
         }
 
         if (selectedFilter.contains("PBM Binary")) {
-            newMagicType = p4;
             selectedFilter = "p4";
         } else if (selectedFilter.contains("PGM Binary")) {
-            newMagicType = p5;
             selectedFilter = "p5";
         } else if (selectedFilter.contains("PPM Binary")) {
-            newMagicType = p6;
             selectedFilter = "p6";
         }else if (selectedFilter.contains("PBM ASCII")) {
-            newMagicType = p1;
             selectedFilter = "p1";
         } else if (selectedFilter.contains("PGM ASCII")) {
-            newMagicType = p2;
             selectedFilter = "p2";
         } else if (selectedFilter.contains("PPM ASCII")) {
-            newMagicType = p3;
             selectedFilter = "p3";
         }
-
-        conversionNeeded = (magicType != newMagicType);
-
-        converter = Convert::convertPNMImage();
-        m_imageProcessor.convertImage(std::move(converter), selectedFilter, filePath);
 
         QImage img = m_imageProcessor.getCurrentImage();
 
@@ -274,13 +254,6 @@ void MainWindow::onActionExportTriggered() {
             selectedFilter = "jpg";
         } else if (selectedFilter.contains("*.bmp")) {
             selectedFilter = "bmp";
-        }
-
-        conversionNeeded = (selectedFilter != suffix);
-
-        if(conversionNeeded){
-            converter = Convert::convertNormalImage();
-            m_imageProcessor.convertImage(std::move(converter), selectedFilter, filePath);
         }
 
         if (m_imageProcessor.exportImage(filePath)) {

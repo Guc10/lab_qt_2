@@ -2,7 +2,6 @@
 #define IMAGEFILTERINTERFACE_H
 
 #include <QImage>
-#include <memory>
 
 class IImageFilter {
 public:

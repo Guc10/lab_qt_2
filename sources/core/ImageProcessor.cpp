@@ -70,31 +70,6 @@ void ImageProcessor::applyFilter(std::unique_ptr<IImageFilter> filter) {
     m_isModified = true;
 }
 
-void ImageProcessor::convertImage(std::unique_ptr<IImageConverter> converter, const QString& format, const QString& filePath) {
-    if (m_currentImage.isNull()) return;
-
-    m_currentImage = converter->convertImage(m_currentImage, format, filePath);
-
-    if(format == "p1"){
-        m_PNMType = p1;
-    }else if(format == "p2"){
-        m_PNMType = p2;
-    }else if(format == "p3"){
-        m_PNMType = p3;
-    }else if(format == "p4"){
-        m_PNMType = p4;
-    }else if(format == "p5"){
-        m_PNMType = p5;
-    }else if(format == "p6"){
-        m_PNMType = p6;
-    }else{
-        m_PNMType = undefined;
-        m_suffix = format;
-    }
-    m_currentPath = filePath;
-    m_isModified = true;
-}
-
 // Clearing effects and Canvas
 
 void ImageProcessor::resetToOriginal() {
